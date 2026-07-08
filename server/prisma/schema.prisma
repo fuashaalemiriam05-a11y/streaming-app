@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String             @id @default(cuid())
+  email        String             @unique
+  name         String?
+  role         String             @default("viewer")
+  passwordHash String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  flags        ModerationFlag[]  @relation("FlagReporter")
+}
+
+model Video {
+  id          String             @id @default(cuid())
+  title       String
+  description String?
+  status      String             @default("draft")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  flags       ModerationFlag[]
+  events      EventLog[]
+  histories   WatchHistory[]
+}
+
+model WatchHistory {
+  id                    String   @id @default(cuid())
+  userId                String
+  videoId               String
+  video                 Video    @relation(fields: [videoId], references: [id])
+  watchTimeSeconds      Int      @default(0)
+  lastPositionSeconds   Int      @default(0)
+  completed             Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([userId, videoId])
+}
+
+model EventLog {
+  id                  String   @id @default(cuid())
+  userId              String
+  videoId             String
+  video               Video    @relation(fields: [videoId], references: [id])
+  eventType           String
+  watchTimeSeconds    Int      @default(0)
+  positionSeconds     Int      @default(0)
+  durationSeconds     Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ModerationFlag {
+  id           String    @id @default(cuid())
+  videoId      String
+  video        Video     @relation(fields: [videoId], references: [id])
+  reporterId   String
+  reporter     User      @relation("FlagReporter", fields: [reporterId], references: [id])
+  reason       String
+  notes        String?
+  status       String    @default("pending")
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

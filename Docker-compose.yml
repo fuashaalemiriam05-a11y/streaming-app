@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: streamcm
+      POSTGRES_USER: streamcm
+      POSTGRES_PASSWORD: streamcm
+    ports:
+      - '5432:5432'
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+  server:
+    build: ./server
+    environment:
+      DATABASE_URL: postgresql://streamcm:streamcm@postgres:5432/streamcm
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '4000:4000'
+  worker:
+    build: ./server
+    command: npm run worker
+    environment:
+      DATABASE_URL: postgresql://streamcm:streamcm@postgres:5432/streamcm
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis

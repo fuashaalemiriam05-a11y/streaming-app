@@ -1,0 +1,17 @@
+{
+  "name": "streamcm-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev": "npm run dev --workspace client",
+    "server": "npm run dev --workspace server",
+    "lint": "npm run lint --workspace client && npm run lint --workspace server",
+    "test": "npm run test --workspace client && npm run test --workspace server"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "husky": "^9.0.0"
+  }
+}
